@@ -31,6 +31,16 @@ except KeyError as e:
 # --- 全局设置 ---
 TEST_MODE = os.environ.get('TEST_MODE', 'false').lower() == 'true'  # ✅ 本地测试设为 True，部署时改为 False ;True 直接跑通，false 程序自由调用
 
+# 把自己伪装成 Windows 10 上的 Telegram 官方桌面版
+# 这样服务器看到的设备就是 "Desktop" 而不是 "Python Script"
+CLIENT_PARAMS = {
+    'device_model': 'Desktop',      # 设备类型
+    'system_version': 'Windows 10', # 系统版本
+    'app_version': '4.14.13',       # App 版本 (随手填个比较新的)
+    'lang_code': 'zh-hans',         # 语言
+    'system_lang_code': 'zh-CN'     # 系统语言
+}
+
 async def work_with_bot(client, bot_config):
     """处理机器人签到任务 (修复版)"""
     target = bot_config['username']
@@ -44,6 +54,10 @@ async def work_with_bot(client, bot_config):
         # exclusive=False 允许你在其他地方同时也操作这个bot，防止锁死
         async with client.conversation(target, timeout=30, exclusive=False) as conv:
             
+            await client.send_read_acknowledge(target)
+
+            # 随机延迟 1-3 秒再发命令
+            await asyncio.sleep(random.uniform(1, 3))
             # 1. 使用 conv.send_message 而不是 client.send_message
             # 这样 Telethon 才知道这一发一收是对应的一组
             await conv.send_message(cmd)
@@ -54,6 +68,9 @@ async def work_with_bot(client, bot_config):
             response = await conv.get_response()
             print(f"   📩 收到回复，寻找按钮包含: [{btn_text}]")
 
+            think_time = random.uniform(2, 5)
+            print(f"   👀 即将匹配按钮， 模拟人类延迟 {think_time:.2f}s...")
+            await asyncio.sleep(think_time)
             # 3. 找按钮并点击
             if response.buttons:
                 for row in response.buttons:
@@ -107,7 +124,8 @@ async def main():
     else:
         print("☁️ 未检测到代理配置，使用直连模式 (GitHub Actions环境)")
 
-    async with TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH, proxy=proxy_args) as client:
+    async with TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH, proxy=proxy_arg,**CLIENT_PARAMS) as client:
+        print("✅ 登录成功 (已伪装成 Windows Desktop)")
         print("✅ 登录成功，开始处理任务列表...")
 
         # 2. 遍历 Bot 列表
