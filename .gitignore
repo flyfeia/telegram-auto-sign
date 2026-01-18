@@ -1,0 +1,7 @@
+# 忽略环境配置
+.env
+venv/
+__pycache__/
+
+# 忽略敏感配置文件
+config.json
