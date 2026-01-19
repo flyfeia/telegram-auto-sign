@@ -35,8 +35,8 @@ TEST_MODE = os.environ.get('TEST_MODE', 'false').lower() == 'true'  # ✅ 本地
 # 这样服务器看到的设备就是 "Desktop" 而不是 "Python Script"
 CLIENT_PARAMS = {
     'device_model': 'Desktop',      # 设备类型
-    'system_version': 'Windows 10', # 系统版本
-    'app_version': '4.14.13',       # App 版本 (随手填个比较新的)
+    'system_version': 'Windows 11', # 系统版本
+    'app_version': '6.4.2',       # App 版本 (随手填个比较新的)
     'lang_code': 'zh-hans',         # 语言
     'system_lang_code': 'zh-CN'     # 系统语言
 }
@@ -124,7 +124,7 @@ async def main():
     else:
         print("☁️ 未检测到代理配置，使用直连模式 (GitHub Actions环境)")
 
-    async with TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH, proxy=proxy_arg,**CLIENT_PARAMS) as client:
+    async with TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH, proxy=proxy_args,**CLIENT_PARAMS) as client:
         print("✅ 登录成功 (已伪装成 Windows Desktop)")
         print("✅ 登录成功，开始处理任务列表...")
 
