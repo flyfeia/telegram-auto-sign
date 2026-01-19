@@ -5,7 +5,7 @@ import random
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 from dotenv import load_dotenv
-import python_socks  
+import python_socks
 
 
 # --- 加载本地 .env (用于本地测试) ---
@@ -13,14 +13,14 @@ load_dotenv()
 
 # --- 配置读取 ---
 try:
-    API_ID = int(os.environ['TG_API_ID'])
-    API_HASH = os.environ['TG_API_HASH']
-    SESSION_STRING = os.environ['TG_SESSION_STRING']
+    API_ID = int(os.environ["TG_API_ID"])
+    API_HASH = os.environ["TG_API_HASH"]
+    SESSION_STRING = os.environ["TG_SESSION_STRING"]
 
-    config_str = os.environ.get('TG_CONFIG_JSON')
+    config_str = os.environ.get("TG_CONFIG_JSON")
     if not config_str:
         raise KeyError("TG_CONFIG_JSON")
-        
+
     CONFIG = json.loads(config_str)
     print("✅ 成功从环境变量加载配置")
 except KeyError as e:
@@ -29,31 +29,30 @@ except KeyError as e:
 
 
 # --- 全局设置 ---
-TEST_MODE = os.environ.get('TEST_MODE')  # ✅ 本地测试设为 True，部署时改为 False ;True 直接跑通，false 程序自由调用
+TEST_MODE = os.environ.get("TEST_MODE")
 
-# 把自己伪装成 Windows 10 上的 Telegram 官方桌面版
-# 这样服务器看到的设备就是 "Desktop" 而不是 "Python Script"
 CLIENT_PARAMS = {
-    'device_model': '82Y5',      # 设备类型
-    'system_version': 'Windows 11', # 系统版本
-    'app_version': '6.4.2',       # App 版本 (随手填个比较新的)
-    'lang_code': 'zh-hans',         # 语言
-    'system_lang_code': 'zh-CN'     # 系统语言
+    "device_model": "82Y5",  # 设备类型
+    "system_version": "Windows 11",  # 系统版本
+    "app_version": "6.4.2",  # App 版本 (随手填个比较新的)
+    "lang_code": "zh-hans",  # 语言
+    "system_lang_code": "zh-CN",  # 系统语言
 }
+
 
 async def work_with_bot(client, bot_config):
     """处理机器人签到任务 (修复版)"""
-    target = bot_config['username']
-    cmd = bot_config.get('command', bot_config['command'])
-    btn_text = bot_config.get('button_text', bot_config['button_text'])
-    
+    target = bot_config["username"]
+    cmd = bot_config.get("command", bot_config["command"])
+    btn_text = bot_config.get("button_text", bot_config["button_text"])
+
     print(f"\n🤖 正在执行 Bot 任务: {target} ({bot_config.get('note', '')})")
 
     try:
         # 关键修改：先建立会话上下文 (conversation)，然后再在里面发送消息
         # exclusive=False 允许你在其他地方同时也操作这个bot，防止锁死
         async with client.conversation(target, timeout=30, exclusive=False) as conv:
-            
+
             await client.send_read_acknowledge(target)
 
             # 随机延迟 1-3 秒再发命令
@@ -88,13 +87,16 @@ async def work_with_bot(client, bot_config):
     except Exception as e:
         # 打印更详细的错误堆栈，方便排查
         import traceback
+
         print(f"   ❌ Bot 任务出错: {e}")
         # print(traceback.format_exc()) # 如果还需要调试，可以取消这行的注释
+
+
 async def work_with_group(client, group_config):
     """处理群组签到任务"""
-    target_id = group_config['id']
-    msg = group_config['message']
-    
+    target_id = group_config["id"]
+    msg = group_config["message"]
+
     print(f"\n📢 正在执行群组任务: {target_id} ({group_config.get('note', '')})")
 
     try:
@@ -103,9 +105,9 @@ async def work_with_group(client, group_config):
     except Exception as e:
         print(f"   ❌ 群组任务出错: {e} (请检查群ID是否正确)")
 
+
 async def main():
     print("🚀 程序启动...")
-
 
     # 1. 启动前的随机大等待 (防定时检测)
     if TEST_MODE:
@@ -116,33 +118,39 @@ async def main():
         await asyncio.sleep(wait_time)
 
     proxy_args = None
-    if os.environ.get('TG_PROXY_PORT'):
-        proxy_port = int(os.environ['TG_PROXY_PORT'])
+    if os.environ.get("TG_PROXY_PORT"):
+        proxy_port = int(os.environ["TG_PROXY_PORT"])
         print(f"🌍 检测到本地代理配置，使用端口: {proxy_port}")
         # 这里默认使用 HTTP 代理，如果需要 SOCKS5 请改为 socks.SOCKS5
-        proxy_args = (python_socks.ProxyType.HTTP, '127.0.0.1', proxy_port)
+        proxy_args = (python_socks.ProxyType.HTTP, "127.0.0.1", proxy_port)
     else:
         print("☁️ 未检测到代理配置，使用直连模式 (GitHub Actions环境)")
 
-    async with TelegramClient(StringSession(SESSION_STRING), API_ID, API_HASH, proxy=proxy_args,**CLIENT_PARAMS) as client:
+    async with TelegramClient(
+        StringSession(SESSION_STRING),
+        API_ID,
+        API_HASH,
+        proxy=proxy_args,
+        **CLIENT_PARAMS,
+    ) as client:
         print("✅ 登录成功 (已伪装成 Windows Desktop)")
         print("✅ 登录成功，开始处理任务列表...")
 
         # 2. 遍历 Bot 列表
-        bots = CONFIG.get('bots', [])
+        bots = CONFIG.get("bots", [])
         for bot in bots:
             await work_with_bot(client, bot)
-            
+
             # 任务间随机休息 10-30 秒 (模拟真人操作间隔)
             sleep_time = random.randint(10, 30)
             print(f"   💤 休息 {sleep_time} 秒...")
             await asyncio.sleep(sleep_time)
 
         # 3. 遍历 群组 列表
-        groups = CONFIG.get('groups', [])
+        groups = CONFIG.get("groups", [])
         for group in groups:
             await work_with_group(client, group)
-            
+
             # 任务间随机休息
             sleep_time = random.randint(10, 30)
             print(f"   💤 休息 {sleep_time} 秒...")
@@ -150,5 +158,6 @@ async def main():
 
     print("\n🎉 所有任务执行完毕！")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     asyncio.run(main())
