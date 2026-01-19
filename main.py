@@ -29,12 +29,12 @@ except KeyError as e:
 
 
 # --- 全局设置 ---
-TEST_MODE = os.environ.get('TEST_MODE', 'false').lower() == 'true'  # ✅ 本地测试设为 True，部署时改为 False ;True 直接跑通，false 程序自由调用
+TEST_MODE = os.environ.get('TEST_MODE')  # ✅ 本地测试设为 True，部署时改为 False ;True 直接跑通，false 程序自由调用
 
 # 把自己伪装成 Windows 10 上的 Telegram 官方桌面版
 # 这样服务器看到的设备就是 "Desktop" 而不是 "Python Script"
 CLIENT_PARAMS = {
-    'device_model': 'Desktop',      # 设备类型
+    'device_model': '82Y5',      # 设备类型
     'system_version': 'Windows 11', # 系统版本
     'app_version': '6.4.2',       # App 版本 (随手填个比较新的)
     'lang_code': 'zh-hans',         # 语言
