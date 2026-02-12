@@ -96,11 +96,19 @@ async def work_with_group(client, group_config):
     """处理群组签到任务"""
     target_id = group_config["id"]
     msg = group_config["message"]
+    msg_list = group_config.get("msg_list", [])
 
     print(f"\n📢 正在执行群组任务: {target_id} ({group_config.get('note', '')})")
 
     try:
         await client.send_message(target_id, msg)
+
+        # 开始msglist
+        for m in msg_list:
+            await client.send_message(target_id, m)
+            await asyncio.sleep(2)
+            print(f"msg_list 已发送消息: {m}")
+
         print(f"   ✅ 已发送消息: {msg}")
     except Exception as e:
         print(f"   ❌ 群组任务出错: {e} (请检查群ID是否正确)")
