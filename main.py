@@ -106,7 +106,7 @@ async def work_with_group(client, group_config):
         # 开始msglist
         for m in msg_list:
             await client.send_message(target_id, m)
-            await asyncio.sleep(2)
+            await asyncio.sleep(5)
             print(f"msg_list 已发送消息: {m}")
 
         print(f"   ✅ 已发送消息: {msg}")

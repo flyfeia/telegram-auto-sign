@@ -59,7 +59,7 @@ TG_PROXY_PORT=10808
 # 是否是测试模式
 TEST_MODE=true
 # 发送的BOT和msg
-TG_CONFIG_JSON='{"bots":[{"username":"bot","command":"/start","button_text":"签到","note":"备注"}],"groups":[{"id":-1009876543210,"message":"哈咯 大家好","note":"这是某个资源群"}]}'
+TG_CONFIG_JSON='{"bots":[{"username":"bot","command":"/start","button_text":"签到","note":"备注"}],"groups":[{"id":-1009876543210,"message":"哈咯 大家好","note":"这是某个资源群","msg_list":["12345","上山打老虎"]}]}'
 ```
 
 ## Log示例
